@@ -1,6 +1,6 @@
 import type { AssetInfo, TransactionItem, TokenTransferItem } from '@/types/wallet'
 
-const API_BASE = 'http://localhost:4002'
+const API_BASE = 'https://blockchain-data.mdogs.me'
 const OP_CHAIN_ID = 3; // Optimism chain ID
 
 export class WalletAPI {

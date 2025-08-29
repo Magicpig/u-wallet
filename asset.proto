@@ -1,0 +1,55 @@
+syntax = "proto3";
+package blockchain.v1;
+
+import "common/v1/enums.proto";
+
+// Token type enum
+enum TokenType {
+  TOKEN_TYPE_UNSPECIFIED = 0;
+  TOKEN_TYPE_NATIVE = 1;
+  TOKEN_TYPE_ERC20 = 2;
+  TOKEN_TYPE_ERC721 = 3;
+  TOKEN_TYPE_ERC1155 = 4;
+}
+
+// Asset information
+message AssetInfo {
+  string blockchain = 1;
+  string tokenName = 2;
+  string tokenSymbol = 3;
+  int32 tokenDecimals = 4;
+  TokenType tokenType = 5;
+  optional string contractAddress = 6;      // Optional for native tokens
+  string holderAddress = 7;
+  string balance = 8;
+  string balanceRawInteger = 9;
+  string balanceUsd = 10;
+  string tokenPrice = 11;
+  string thumbnail = 12;
+}
+
+// Balance result data
+message BalanceResult {
+  string totalBalanceUsd = 1;
+  int32 totalCount = 2;
+  repeated AssetInfo assets = 3;
+  int64 timestamp = 4;
+}
+
+// Request message
+message GetBalanceRequest {
+  common.v1.SystemChainId systemChainId = 1;
+  string address = 2;
+}
+
+// Response message
+message GetBalanceResponse {
+  int32 code = 1;
+  optional string message = 2;
+  optional BalanceResult result = 3;
+}
+
+// RPC Service
+service WalletBalanceService {
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse);
+}

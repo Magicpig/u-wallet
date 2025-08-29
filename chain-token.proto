@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package blockchain.v1;
+
+import "common/v1/enums.proto";
+
+// Currency/Token information
+message CurrencyInfo {
+  string blockchain = 1;                    // 区块链网络 (如 "optimism")
+  optional string address = 2;              // 代币合约地址 (原生币为空)
+  string name = 3;                          // 代币名称 (如 "USD Coin")
+  int32 decimals = 4;                       // 小数位数
+  string symbol = 5;                        // 代币符号 (如 "USDC")
+  string thumbnail = 6;                     // 代币图标URL 
+}
+
+// Supported currencies result
+message SupportedCurrenciesResult {
+  repeated CurrencyInfo currencies = 1;     // 支持的币种列表
+  int64 timestamp = 2;                      // 数据时间戳
+}
+
+// Request message
+message GetSupportedCurrenciesRequest {
+  common.v1.SystemChainId systemChainId = 1;  // 指定区块链网络
+}
+
+// Response message
+message GetSupportedCurrenciesResponse {
+  int32 code = 1;
+  optional string message = 2;
+  optional SupportedCurrenciesResult result = 3;
+}
+
+// RPC Service
+service WalletCurrencyService {
+  rpc GetSupportedCurrencies(GetSupportedCurrenciesRequest) returns (GetSupportedCurrenciesResponse);
+}

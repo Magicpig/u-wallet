@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package blockchain.v1;
+
+import "common/v1/enums.proto";
+
+// Transaction status enum
+enum TransactionStatus {
+  TRANSACTION_STATUS_UNSPECIFIED = 0;
+  TRANSACTION_STATUS_SUCCESS = 1;
+  TRANSACTION_STATUS_FAILED = 2;
+}
+
+// ========== 原始交易相关 ==========
+
+// 原始交易项 - 对应区块链上的实际交易
+message RawTransactionItem {
+  string hash = 1;                         // 交易哈希
+  string from = 2;                         // 发送方地址
+  string to = 3;                           // 接收方地址
+  string value = 4;                        // 交易价值 (hex, 原生币数量)
+  string gas = 5;                          // Gas限制 (hex)
+  string gasPrice = 6;                     // Gas价格 (hex)
+  string gasUsed = 7;                      // 实际使用的Gas (hex)
+  string nonce = 8;                        // 交易nonce (hex)
+  string blockNumber = 9;                  // 区块号 (hex)
+  string blockHash = 10;                   // 区块哈希
+  string transactionIndex = 11;            // 交易在区块中的索引 (hex)
+  string type = 12;                        // 交易类型 (hex)
+  string status = 13;                      // 交易状态 (hex)
+  string input = 14;                       // 输入数据
+  string timestamp = 15;                   // 时间戳 (hex)
+  string blockchain = 16;                  // 区块链名称
+  string cumulativeGasUsed = 17;           // 累计Gas使用量 (hex)
+  
+  // 签名相关字段
+  string v = 18;                           // 签名v值 (hex)
+  string r = 19;                           // 签名r值 (hex)
+  string s = 20;                           // 签名s值 (hex)
+}
+
+// 原始交易历史结果
+message RawTransactionHistoryResult {
+  repeated RawTransactionItem transactions = 1;
+  optional string nextPageToken = 2;       // 下一页token
+}
+
+// ========== 代币转账相关 ==========
+
+// 代币转账项
+message TokenTransferItem {
+  string fromAddress = 1;                  // 发送方地址
+  string toAddress = 2;                    // 接收方地址
+  string contractAddress = 3;              // 代币合约地址
+  string value = 4;                        // 转账数量 (格式化后的可读数量)
+  string valueRawInteger = 5;              // 原始整数值 (通常为空字符串)
+  string blockchain = 6;                   // 区块链名称
+  string tokenName = 7;                    // 代币名称
+  string tokenSymbol = 8;                  // 代币符号
+  int32 tokenDecimals = 9;                 // 代币精度
+  optional string thumbnail = 10;          // 代币图标URL
+  string transactionHash = 11;             // 关联的交易哈希
+  int64 blockHeight = 12;                  // 区块高度
+  int64 timestamp = 13;                    // 时间戳
+}
+
+// 代币转账历史结果
+message TokenTransferHistoryResult {
+  repeated TokenTransferItem transfers = 1;
+  optional string nextPageToken = 2;       // 下一页token (base64编码)
+}
+
+// ========== 请求和响应消息 ==========
+
+// 获取原始交易历史请求
+message GetRawTransactionHistoryRequest {
+  common.v1.SystemChainId systemChainId = 1;
+  string address = 2;                      // 钱包地址
+  optional string cursor = 3;              // 游标，首次请求为空
+  optional int32 limit = 4;                // 每次获取数量，默认20，最大100
+}
+
+// 获取原始交易历史响应
+message GetRawTransactionHistoryResponse {
+  int32 code = 1;
+  optional string message = 2;
+  optional RawTransactionHistoryResult result = 3;
+}
+
+// 获取代币转账历史请求
+message GetTokenTransferHistoryRequest {
+  common.v1.SystemChainId systemChainId = 1;
+  string address = 2;                      // 钱包地址
+  optional string cursor = 3;              // 游标，首次请求为空，后续传入nextPageToken
+  optional int32 limit = 4;                // 每次获取数量，默认20，最大100
+  optional string contractAddress = 5;     // 可选：指定代币合约地址，为空则获取所有代币转账
+}
+
+// 获取代币转账历史响应
+message GetTokenTransferHistoryResponse {
+  int32 code = 1;
+  optional string message = 2;
+  optional TokenTransferHistoryResult result = 3;
+}
+
+// ========== RPC Service ==========
+service WalletTransactionService {
+  // 获取原始交易历史
+  rpc GetRawTransactionHistory(GetRawTransactionHistoryRequest) returns (GetRawTransactionHistoryResponse);
+  
+  // 获取代币转账历史
+  rpc GetTokenTransferHistory(GetTokenTransferHistoryRequest) returns (GetTokenTransferHistoryResponse);
+}
